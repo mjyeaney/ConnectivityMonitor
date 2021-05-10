@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <title>LAN Monitor Status</title>
+  <link rel="stylesheet" href="styles.css?ver=1.05" />
+  <script>
+    window.onload = async function(e){
+      let lastSync = new Date();
+      
+      let updateFn = async () => {
+        let result = await fetch(`https://monitorstatus.blob.core.windows.net/status/now.json?_=${new Date()}`);
+        let data = await result.json();
+        let serverDate = new Date(data.lastupdate);
+        let deltaSec = Math.abs((lastSync - serverDate) / 1000);
+        let imageUri = "network-down.gif";
+
+        // Update image
+        if (deltaSec <= (60 + 5)) { // within a minute + skew
+          imageUri = "network-up.gif";
+        }
+
+        // Update DOM
+        document.getElementById("statusImage").src = imageUri;
+        document.getElementById("statusField").innerText = serverDate.toLocaleString();
+        document.getElementById("serverTimestamp").innerText = serverDate.toLocaleString();
+        document.getElementById("lastRefresh").innerText = lastSync.toLocaleString();
+        document.getElementById("delta").innerText = deltaSec;
+
+        // Update last check timestamp
+        lastSync = new Date();
+      };
+
+      document.getElementById('btnRefresh').addEventListener("click", (e) => {
+        location.reload();
+      });
+      
+      await updateFn();
+      setInterval(updateFn, 1 * 30 * 1000);
+    };
+  </script>
+</head>
+<body>
+  <div id="content">
+    <h1>LAN Monitor Status</h1>
+    <p>Last update from home LAN monitor occurred on: <span id="statusField">(pending update)</span></p>
+    <img id="statusImage" src="" />
+    <ol>
+      <li>Server Timestamp: <span id="serverTimestamp"></span></li>
+      <li>Last Refresh: <span id="lastRefresh"></span></li>
+      <li>Time Delta: <span id="delta"></span> sec.</li>
+    </ol>
+    <button id="btnRefresh">Refresh Now</button>
+  </div>
+</body>
+</html>

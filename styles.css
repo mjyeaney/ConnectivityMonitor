@@ -1,0 +1,15 @@
+* { margin: 0; padding: 0; }
+body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 13px; color: #111; background-color: #f3f1f2; }
+h1 { font-weight: 400; margin-bottom: 1em; }
+ol { list-style-type: none; margin-bottom: 1em; }
+#content { margin: 1em; text-align: center;}
+#content p {margin-bottom: 1em;}
+#statusField { font-weight: bold; color: #24548e;}
+#btnRefresh {
+    background-color: green;
+    color: white;
+    padding: .75em;
+    border: 1px solid #333;
+    cursor: pointer;
+}
+#btnRefresh:active, #btnRefresh:focus { outline: none }
