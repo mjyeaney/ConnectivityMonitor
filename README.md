@@ -63,3 +63,15 @@ would look like this:
 
 This will run the `monitor.sh` file every minute (and log it's output to the `minitor.log` file as well)
 for debugging info.
+
+## Running
+
+Once the cron job is setup and correct reporting status to the blob container, the front-end 
+web app should indicate success as shown below:
+
+![Network Up](docs/network-up.png)
+
+Or, if the cron job is stopped, with ~2 minutes, the page should automatically reflect the network 
+being down as shown below:
+
+![Network Up](docs/network-down.png)
