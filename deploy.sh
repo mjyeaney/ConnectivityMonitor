@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# 
+# This file deploys the Azure resources and assets needed to support
+# the Connectivity monitor sample. Requires the Azure CLI to be in scope
+# and logged in with appropriate permissions.
+#
+
 # Setup config vars
 resource_group_name="PowerMonitorRG_1"
 location="eastus"
@@ -34,42 +40,32 @@ az storage container create \
   -n $data_container_name \
   --account-name $storage_account_name \
   -g $resource_group_name \
+  --public-access container \
   --only-show-errors
+
+# Enable CORS access (read-ony) to the data container
+echo "Enabling read access to data container.."
+az storage cors clear \
+  --account-name $storage_account_name \
+  --services b \
+  --only-show-errors
+
+az storage cors add \
+  --methods GET OPTIONS \
+  --origins "*" \
+  --services b \
+  --account-name $storage_account_name \
+  --only-show-errors 
 
 # Upload satic assets to $web container
 echo "Uploading web app assets.."
-az storage blob upload \
-  -n default.html \
-  -c \$web \
-  -f default.html \
-  --account-name powermonitor050920211 \
-  --only-show-errors \
-  --no-progress
-
-az storage blob upload \
-  -n styles.css \
-  -c \$web \
-  -f styles.css \
-  --account-name powermonitor050920211 \
-  --only-show-errors \
-  --no-progress
-
-az storage blob upload \
-  -n network-down.gif \
-  -c \$web \
-  -f network-down.gif \
-  --account-name powermonitor050920211 \
-  --only-show-errors \
-  --no-progress
-
-az storage blob upload \
-  -n network-up.gif \
-  -c \$web \
-  -f network-up.gif \
-  --account-name powermonitor050920211 \
+az storage blob upload-batch \
+  -d \$web \
+  -s webapp \
+  --account-name $storage_account_name \
   --only-show-errors \
   --no-progress
 
 # Finished - get summary info
-webendpoint=$(az storage account show -n powermonitor050920211 -g PowerMonitorRG_1 | jq '.primaryEndpoints.web')
+webendpoint=$(az storage account show -n $storage_account_name -g $resource_group_name | jq '.primaryEndpoints.web')
 echo "Deployment complete - access site at: $webendpoint"

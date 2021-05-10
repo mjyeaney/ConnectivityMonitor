@@ -10,8 +10,19 @@
       let lastSync = new Date();
       
       let updateFn = async () => {
-        let result = await fetch(`https://monitorstatus.blob.core.windows.net/status/now.json?_=${new Date()}`);
-        let data = await result.json();
+        // Note the storage account URI below must match what is configured in the deploy.sh file
+        let result = await fetch(`https://powermonitor050920211.blob.core.windows.net/status/now.json?_=${Date.now()}`);
+        let data = {};
+        if (result.status == 200) {
+          data = await result.json();
+        } else {
+          // Default to a month ago
+          let defaultDate = new Date();
+          defaultDate.setMonth(defaultDate.getMonth() - 1);
+          data.lastupdate = defaultDate.toISOString();
+        }
+
+        // Compute duration since last update
         let serverDate = new Date(data.lastupdate);
         let deltaSec = Math.abs((lastSync - serverDate) / 1000);
         let imageUri = "network-down.gif";
@@ -21,12 +32,24 @@
           imageUri = "network-up.gif";
         }
 
+        // Format delta properly
+        let formattedDelta = "";
+        if (deltaSec > 86400) {
+          formattedDelta = `Over ${deltaSec / 86400} days`;
+        } else if (deltaSec > 3600) {
+          formattedDelta = `Over ${deltaSec / 3600} hours`;
+        } else if (deltaSec > 60) {
+          formattedDelta = `Over ${deltaSec / 60} minutes`;
+        } else {
+          formattedDelta = `Over ${deltaSec} seconds`;
+        }
+
         // Update DOM
         document.getElementById("statusImage").src = imageUri;
         document.getElementById("statusField").innerText = serverDate.toLocaleString();
         document.getElementById("serverTimestamp").innerText = serverDate.toLocaleString();
         document.getElementById("lastRefresh").innerText = lastSync.toLocaleString();
-        document.getElementById("delta").innerText = deltaSec;
+        document.getElementById("delta").innerText = formattedDelta;
 
         // Update last check timestamp
         lastSync = new Date();
@@ -49,7 +72,7 @@
     <ol>
       <li>Server Timestamp: <span id="serverTimestamp"></span></li>
       <li>Last Refresh: <span id="lastRefresh"></span></li>
-      <li>Time Delta: <span id="delta"></span> sec.</li>
+      <li>Time Delta: <span id="delta"></span></li>
     </ol>
     <button id="btnRefresh">Refresh Now</button>
   </div>
