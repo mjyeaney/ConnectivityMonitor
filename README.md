@@ -75,3 +75,9 @@ Or, if the cron job is stopped, with ~2 minutes, the page should automatically r
 being down as shown below:
 
 ![Network Up](docs/network-down.png)
+
+## Remaining Work
+
+As this was only a 30 minute exercise, there's lots that could be cleaned up. Formatting, 
+edge/error conditions, etc. I'll file issues as I find things, but as always feel free to update 
+and submit any issues / PR's you would like!
